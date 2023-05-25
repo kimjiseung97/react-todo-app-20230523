@@ -3,7 +3,7 @@ import TodoItem from './TodoItem'
 
 import './scss/TodoMain.scss';
 
-const TodoMain = ({todoList}) => {
+const TodoMain = ({todoList,remove,check}) => {
     // console.log(props);
 
     const rederTodoItem = () =>{
@@ -14,7 +14,7 @@ const TodoMain = ({todoList}) => {
   return (
     <ul className='todo-list'>
         {
-           todoList.map(todo=><TodoItem key={todo.id} item={todo}/>)
+           todoList.map(todo=><TodoItem key={todo.id} item={todo} remove={remove} check={check}/>)
         }
     </ul>
   )

@@ -4,34 +4,17 @@ import TodoMain from './TodoMain'
 import TodoInput from './TodoInput'
 
 import './scss/TodoTemplate.scss';
+import { json } from 'react-router-dom';
 
 const TodoTemplate = () => {
 
     //서버에 할일 목록(json)을 요청해서 받아와야함
+    const API_BASE_URL = 'http://localhost:8383/api/todos';
     
     //todos 배열을 상태관리
     const [todos,setTodos] = useState(
       [
-        {
-          id : 1,
-          title : '아침 산책하기',
-          done : false  
-        },
-        {
-            id : 2,
-            title : '오늘 주간 신문 읽기',
-            done : true  
-        },
-        {
-            id : 3,
-            title : '샌드위치 사먹기',
-            done : false  
-        },
-        {
-            id : 4,
-            title : '리액트 복습하기',
-            done : false  
-        },
+        
       ]
     );
 
@@ -58,6 +41,16 @@ const TodoTemplate = () => {
       //새로운 상태를 만들어서 변경해야한다. 
 
       //setTodos(todos.concat([newTodo]));
+      fetch(API_BASE_URL,{
+        method : 'POST',
+        headers : {'content-type':'application/json'},
+        body : JSON.stringify(newTodo)
+      })
+      .then(res=>res.json())
+      .then(json=>{
+        setTodos(json.todos)
+      });
+
       setTodos([...todos, newTodo]);
     };
     // TodoTemplate가 todoItem에 아이디를받아오기위해서 함수를내려보낸다
@@ -65,14 +58,22 @@ const TodoTemplate = () => {
     const removeTodo = id =>{
       //console.log(`삭제대상 id  :${id}`);
 
-      const copyArr =todos.filter(todo => todo.id!==id);
+      // const copyArr =todos.filter(todo => todo.id!==id);
       
-      setTodos(copyArr);
+      // setTodos(copyArr);
+      fetch(`${API_BASE_URL}/${id}`, {
+        method: 'DELETE'
+      })
+      .then(res => res.json())
+      .then(json => {
+        setTodos(json.todos);
+      });
+
 
     };
 
     //할 일 체크 처리함수
-    const checkTodo = id =>{
+    const checkTodo = (id, done) =>{
       //console.log(`체크한 Todo id : ${id}`);
       
       // const copyTodos = [...todos];
@@ -82,8 +83,19 @@ const TodoTemplate = () => {
       //   }
       // }
       // setTodos(copyTodos);
+      fetch(API_BASE_URL, {
+        method: 'PUT',
+        headers: {'content-type': 'application/json'},
+        body: JSON.stringify({
+           done: !done,
+           id: id
+        })
+      })
+      .then(res => res.json())
+      .then(json => setTodos(json.todos)); 
 
-    setTodos(todos.map(todo=>todo.id===id?{...todo,done:!todo.done}:todo));
+
+   // setTodos(todos.map(todo=>todo.id===id?{...todo,done:!todo.done}:todo));
       
     };
 
@@ -95,8 +107,14 @@ const TodoTemplate = () => {
 
 
     useEffect(()=>{
-      console.log(todos);
-    },[todos]);
+      fetch(API_BASE_URL)
+      .then(res => res.json())
+      .then(json=>{
+        console.log(json.todos);
+        setTodos(json.todos);
+
+      });
+    },[]);
 
 
   return (

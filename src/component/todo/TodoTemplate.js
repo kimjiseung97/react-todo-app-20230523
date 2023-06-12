@@ -6,10 +6,12 @@ import TodoInput from './TodoInput'
 import './scss/TodoTemplate.scss';
 import { json } from 'react-router-dom';
 
+import { API_BASE_URL as BASE,TODO } from '../../config/host.config';
+
 const TodoTemplate = () => {
 
     //서버에 할일 목록(json)을 요청해서 받아와야함
-    const API_BASE_URL = 'http://localhost:8383/api/todos';
+    const API_BASE_URL = TODO;
     
     //todos 배열을 상태관리
     const [todos,setTodos] = useState(

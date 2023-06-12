@@ -22,7 +22,7 @@ const TodoInput = ({addTodo}) => {
             return open && (
                 <div className='form-wrapper'>
                     <form  className='insert-form'>
-                        <input
+                        <input 
                             type='text'
                             placeholder='할 일을 입력후, 엔터를 누르세요!'
                         />
@@ -50,7 +50,7 @@ const TodoInput = ({addTodo}) => {
         {
             open && (
                 <div className='form-wrapper'>
-                    <form  className='insert-form' onSubmit={submitHandler}>
+                    <form  className='insert-form' onSubmit={submitHandler}>        
                         <input
                             type='text'
                             placeholder='할 일을 입력후, 엔터를 누르세요!' 
@@ -58,7 +58,7 @@ const TodoInput = ({addTodo}) => {
                             value={todoText}
                         />
                     </form>
-                </div>)
+                </div>)   
         }
         {/* cn() : 첫번째 파라미터는 항상유지할 클래스
                     두번째 파라미터는 논리상태값

@@ -1,5 +1,4 @@
-import { Margin } from '@mui/icons-material';
-import { margin } from '@mui/system';
+
 import React from 'react';
 
 const Footer = () => {

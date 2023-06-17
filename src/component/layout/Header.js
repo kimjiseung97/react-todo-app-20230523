@@ -1,15 +1,23 @@
 import React, { useEffect, useState } from 'react'
 import {AppBar, Toolbar, Grid, 
   Typography, Button} from "@mui/material";
+
+
 import './Header.css';
-import { Link,useNavigate} from 'react-router-dom';
-import { isLogin,getLoginUserInfo } from '../../util/login-util';
+import { Link, useNavigate } from 'react-router-dom';
+
+import { isLogin, getLoginUserInfo } from '../../util/login-util';
+import { API_BASE_URL,USER } from '../../config/host.config';
 const Header = () => {
 
-  const [userInfo,setUserInfo] = useState({});
+    const profileRequestURL = `${API_BASE_URL}${USER}/load-profile`;
+//   const [userInfo,setUserInfo] = useState({});
 
-  const {userName,token,role} = userInfo;
+//   const {userName,token,role} = getLoginUserInfo;
   const redirection = useNavigate();
+
+  //프로필이미지 url 상태변수
+  const [profileUrl,setProfileUrl] = useState(null);
 
   //로그아웃 핸들러
   const logoutHandler = e=>{
@@ -25,9 +33,30 @@ const Header = () => {
 // - 배열에 상태변수를 넣을 경우 상태값이 변경될 때마다 useEffect를 호출
 // - 
 
+  const fetchProfileImage = async() => {
+    const res = await fetch(profileRequestURL,{
+        method  : 'GET',
+        headers : {'Authorization': 'Bearer ' + getLoginUserInfo().token }
+    });
+
+    if(res.status===200){
+        //서버에서 직렬화된 이미지가 응답된다
+        const profileBlob = await res.blob();
+        //해당 이미지를 imgUrl로 변경
+        const imgUrl = window.URL.createObjectURL(profileBlob);
+        setProfileUrl(imgUrl);
+    }else{
+        const err = await res.text();
+        // alert(err);
+        setProfileUrl(null);
+    }
+  };
+
   useEffect(()=>{
-    setUserInfo(getLoginUserInfo());
-  },[userInfo])
+
+    fetchProfileImage();
+        
+  })
 
   return (
     <AppBar position="fixed" style={{
@@ -46,12 +75,24 @@ const Header = () => {
                         <Typography variant="h4">
                             {
                                 isLogin()
-                                ?
-                                userName +'님'
-                                 :'오늘'
+                                ? getLoginUserInfo().userName + '님'
+                                : '오늘'
                             }
                             의 할일
                         </Typography>   
+                        <img
+                            src={profileUrl || require('../../assets/img/anonymous.jpg')}
+                            alt='프사프사'
+                            style={
+                                {
+                                    marginLeft :20,
+                                    width : 30,
+                                    height : 30,
+                                    borderRadius : '50%'
+                                }
+                            }
+                        />
+                        
                     </div>
                 </Grid>
                <Grid item>

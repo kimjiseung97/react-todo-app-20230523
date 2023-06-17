@@ -17,19 +17,6 @@ const TodoInput = ({addTodo}) => {
         setOpen(!open)
     };
 
-    const showForm = () =>{
-        
-            return open && (
-                <div className='form-wrapper'>
-                    <form  className='insert-form'>
-                        <input 
-                            type='text'
-                            placeholder='할 일을 입력후, 엔터를 누르세요!'
-                        />
-                    </form>
-                </div>
-            )
-    };
 
     //서브밋 이벤트 핸들러
     const submitHandler = e =>{

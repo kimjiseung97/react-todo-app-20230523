@@ -2,13 +2,18 @@ import React from 'react'
 import { Grid,Button,Container,Typography,TextField } from '@mui/material'
 
 import {API_BASE_URL as BASE,USER} from '../../config/host.config'
-import { json } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import { setLoginUserInfo , isLogin } from '../../util/login-util';
 const Login = () => {
 
   const redirection = useNavigate();  
   const REQUESTURL  = BASE+USER + '/signin';
-
+  
+  if(isLogin()){
+    alert('이미 로그인 중입니다');
+    window.history.back();
+    return;
+  }
   //서버에 ajax요청
   const fetchLogin = async() =>{
 
@@ -31,20 +36,21 @@ const Login = () => {
       return;
     }
 
-    const {token,userName,email,role} = await res.json(); //서버에서 온 json읽기
+    const userInfo = await res.json(); //서버에서 온 json읽기
     //alert(json.userName);
 
     //json에 담긴 인증정보를 클라이언트에 보관
     //1. 로컬 스토리지 - 브라우저가 종료되어도 보관됌
     //2. 세션 스토리지 - 브라우저가 종료되면 사라짐
-    localStorage.setItem('ACCESS_TOKEN',token);
-    localStorage.setItem('LOGIN_USERNAME',userName);
-    localStorage.setItem('USER_ROLE',role);
-
+    setLoginUserInfo(userInfo);
     //홈으로 리다이렉트
     redirection('/');
 
   };
+
+  // 로그인 요청 핸들러
+
+
 
 
   //로그인 요청 핸들러
@@ -52,11 +58,11 @@ const Login = () => {
     e.preventDefault();
 
 
-
     //서버에 로그인요청 전송
     fetchLogin();
 
-  }
+  };
+  
   return (
     <Container component="main" maxWidth="xs" style={{ margin: "200px auto" }}>
             <Grid container spacing={2}>

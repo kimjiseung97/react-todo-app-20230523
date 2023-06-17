@@ -1,6 +1,7 @@
 import React, {
   useEffect,
-  useState
+  useState,
+  useRef
 } from 'react';
 import {
   Button,
@@ -10,16 +11,22 @@ import {
   Typography,
   Link
 } from "@mui/material";
+
+import './joins.scss'
+
 import { API_BASE_URL as BASE,USER } from '../../config/host.config';
-import { json } from 'react-router-dom';
 //리다이랙트 사용하기
 import {useNavigate} from 'react-router-dom';
 
 const Join = () => {
 
+  //useRef로 태그 참조하기
+  const $fileTag = useRef();
+
   const API_BASE_URL = BASE + USER;
   
-  const redirection = useNavigate();
+   // 리다이렉트 사용하기
+   const redirection = useNavigate();
 
   // 상태변수로 회원가입 입력값 관리
   const [userValue, setUserValue] = useState({
@@ -220,6 +227,25 @@ const emailHandler = e => {
 
 };
 
+  //이미지 파일 상태변수
+  const [imgFile,setImgFile] = useState(null);
+
+  
+  //이미지 파일을 선택했을때 썸네일 뿌리기
+  const showThumbnailHandler = e=>{
+
+
+    //첨부된 파일 정보
+    const file = $fileTag.current.files[0];
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onloadend = () =>{
+      setImgFile(reader.result);
+    }
+  };
+
   //4개의 입력칸이 모두 검증에 통과햇는지 여부를 검사
   const isValid = () =>{
     for(const key in correct){
@@ -231,10 +257,22 @@ const emailHandler = e => {
 
   //회원가입 처리 서버 요청
   const fetchSignUpPost = async () =>{
+
+
+    //JSON을 Blob타입으로 변경후 FormData에 넣기
+    const userJsonBlob = new Blob(
+      [JSON.stringify(userValue)],
+      {type : 'application/json'}
+      );
+
+    //이미지 파일과 회원정보 json을 하나로 묶어야 함
+    const userFormData = new FormData();
+    userFormData.append('user',userJsonBlob);
+    userFormData.append('profileImage',$fileTag.current.files[0]);
+
     const res = await fetch(API_BASE_URL,{
       method : 'POST',
-      headers : {'content-type ' :'application/json'},
-      body : JSON.stringify(userValue)
+      body :  userFormData
     });
 
     if(res.status===200){
@@ -243,10 +281,11 @@ const emailHandler = e => {
       redirection('/login');
     }else{
       alert('서버와의 통신이 원활하지 않습니다')
-      redirection.push('/login');
     }
   };
 
+
+  // 회원가입 버튼 클릭 이벤트 핸들러
   const joinButtonClickHandler = e => {
 
     e.preventDefault();
@@ -275,6 +314,23 @@ const emailHandler = e => {
                     <Typography component="h1" variant="h5">
                         계정 생성
                     </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <div className="thumbnail-box" onClick={()=>$fileTag.current.click()}>
+                      <img
+                        src={imgFile || require('../../assets/img/image-add.png')}
+                        alt="profile"
+                      />
+                  </div>
+                  <label className='signup-img-label' htmlFor='profile-img'>프로필 이미지 추가</label>
+                  <input
+                      id='profile-img'
+                      type='file'
+                      style={{display: 'none'}}
+                      accept='image/*'
+                      ref={$fileTag}
+                      onChange={showThumbnailHandler}
+                  />
                 </Grid>
                 <Grid item xs={12}>
                     <TextField

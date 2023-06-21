@@ -10,14 +10,19 @@ import { isLogin, getLoginUserInfo } from '../../util/login-util';
 import { API_BASE_URL,USER } from '../../config/host.config';
 const Header = () => {
 
-    const profileRequestURL = `${API_BASE_URL}${USER}/load-profile`;
+  //  const profileRequestURL = `${API_BASE_URL}${USER}/load-profile`;
 //   const [userInfo,setUserInfo] = useState({});
+const profileRequestURL = `${API_BASE_URL}${USER}/load-s3`;
+
+
 
 //   const {userName,token,role} = getLoginUserInfo;
   const redirection = useNavigate();
 
   //프로필이미지 url 상태변수
   const [profileUrl,setProfileUrl] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(isLogin()); 
+
 
   //로그아웃 핸들러
   const logoutHandler = e=>{
@@ -33,30 +38,73 @@ const Header = () => {
 // - 배열에 상태변수를 넣을 경우 상태값이 변경될 때마다 useEffect를 호출
 // - 
 
-  const fetchProfileImage = async() => {
-    const res = await fetch(profileRequestURL,{
-        method  : 'GET',
-        headers : {'Authorization': 'Bearer ' + getLoginUserInfo().token }
-    });
+// 로그인 상태 변화를 감지하는 useEffect를 추가
+    useEffect(() => {
+    setIsLoggedIn(isLogin());
 
-    if(res.status===200){
-        //서버에서 직렬화된 이미지가 응답된다
-        const profileBlob = await res.blob();
-        //해당 이미지를 imgUrl로 변경
-        const imgUrl = window.URL.createObjectURL(profileBlob);
-        setProfileUrl(imgUrl);
-    }else{
-        const err = await res.text();
-        // alert(err);
-        setProfileUrl(null);
-    }
-  };
+    }, [isLogin()]);
 
-  useEffect(()=>{
 
-    fetchProfileImage();
+//   const fetchProfileImage = async() => {
+//     const res = await fetch(profileRequestURL,{
+//         method  : 'GET',
+//         headers : {'Authorization': 'Bearer ' + getLoginUserInfo().token }
+//     });
+
+//     if(res.status===200){
+//         // 서버에서 s3 url이 응답된다
+//         const imgUrl = await res.text();
+//         setProfileUrl(imgUrl);
+
+//         // //서버에서 직렬화된 이미지가 응답된다
+//         // const profileBlob = await res.blob();
+//         // //해당 이미지를 imgUrl로 변경
+//         // const imgUrl = window.URL.createObjectURL(profileBlob);
+//         // setProfileUrl(imgUrl);
+//     }else{
+//         const err = await res.text();
+//         // alert(err);
+//         setProfileUrl(null);
+//     }
+//   };
+
+
+
+
+//   useEffect(()=>{
+
+//     fetchProfileImage();
         
-  })
+//   })
+
+useEffect(() => {
+    
+    isLoggedIn &&
+    (async() => {
+        const res = await fetch(profileRequestURL, {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + getLoginUserInfo().token }
+        });
+    
+        if (res.status === 200) {
+            // 서버에서 s3 url이 응답된다
+            const imgUrl = await res.text();
+            setProfileUrl(imgUrl);
+
+            /*
+            // 서버에서 직렬화된 이미지가 응답된다.
+            const profileBlob = await res.blob();
+            // 해당 이미지를 imgUrl로 변경
+            const imgUrl = window.URL.createObjectURL(profileBlob);
+            setProfileUrl(imgUrl);
+            */
+        } else {
+            const err = await res.text();
+            setProfileUrl(null);
+        }
+      })();
+    }, [isLoggedIn]);
+
 
   return (
     <AppBar position="fixed" style={{
